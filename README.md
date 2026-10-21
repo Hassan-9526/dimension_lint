@@ -25,6 +25,8 @@ plugins:
     version: ^0.1.0
     diagnostics:
       raw_box_dimension: true
+      raw_edge_insets: true
+      raw_font_size: true
 ```
 
 Restart the Dart Analysis Server after changing this section.
@@ -58,6 +60,26 @@ The rule whitelists **constructor types**, never parameter names. `height` on
 `SizedBox` is a pixel measurement while `height` on `TextStyle` is a multiplier,
 and only resolved type information distinguishes them — which is why this is an
 analyzer plugin and not a regular expression.
+
+### `raw_edge_insets`
+
+Flags numeric literals passed to `EdgeInsets.all`, `EdgeInsets.symmetric`,
+`EdgeInsets.only` and `EdgeInsets.fromLTRB`. `fromLTRB` reports one diagnostic
+per raw dimension, naming each position:
+
+```
+info - lib\home_view.dart:44:56 - Raw numeric literal used for 'left' on
+'EdgeInsets.fromLTRB'. - raw_edge_insets
+info - lib\home_view.dart:44:59 - Raw numeric literal used for 'top' on
+'EdgeInsets.fromLTRB'. - raw_edge_insets
+```
+
+### `raw_font_size`
+
+Flags numeric literals passed as `TextStyle.fontSize`. `TextStyle.height` is a
+line-height multiplier and is never reported, so the two parameters on the same
+type behave differently — which is only possible with resolved type
+information.
 
 ## Running in CI
 

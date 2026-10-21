@@ -8,6 +8,8 @@ library;
 import 'package:analysis_server_plugin/plugin.dart';
 import 'package:analysis_server_plugin/registry.dart';
 import 'package:dimension_lint/src/rules/raw_box_dimension.dart';
+import 'package:dimension_lint/src/rules/raw_edge_insets.dart';
+import 'package:dimension_lint/src/rules/raw_font_size.dart';
 
 /// The plugin instance discovered by the analysis server.
 final plugin = DimensionLintPlugin();
@@ -26,5 +28,7 @@ class DimensionLintPlugin extends Plugin {
     // Registered as a lint rule, so it stays off until a consuming project
     // opts in under `diagnostics`.
     registry.registerLintRule(RawBoxDimension());
+    registry.registerLintRule(RawEdgeInsets());
+    registry.registerLintRule(RawFontSize());
   }
 }

@@ -3,8 +3,8 @@ import 'package:analyzer/analysis_rule/rule_context.dart';
 import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
-import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/error/error.dart';
+import 'package:dimension_lint/src/flutter_element.dart';
 
 /// The constructor types this rule inspects, mapped to the named parameters on
 /// each that are measured in logical pixels.
@@ -75,7 +75,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     if (parameters == null) return;
 
     // A project may well declare its own `SizedBox`; only Flutter's counts.
-    if (!_isFromFlutter(element)) return;
+    if (!isFromFlutterPackage(element)) return;
 
     for (var argument in node.argumentList.arguments) {
       if (argument is! NamedArgument) continue;
@@ -83,21 +83,9 @@ class _Visitor extends SimpleAstVisitor<void> {
       if (!parameters.contains(parameterName)) continue;
 
       var value = argument.argumentExpression;
-      if (value is IntegerLiteral || value is DoubleLiteral) {
+      if (isNumericLiteral(value)) {
         rule.reportAtNode(value, arguments: [parameterName, typeName!]);
       }
     }
-  }
-
-  /// Whether [element] is declared in the `flutter` package.
-  ///
-  /// Matches on the owning package rather than the declaring file, because
-  /// Flutter moves classes between `src/` files across releases and a path
-  /// comparison would silently stop matching.
-  bool _isFromFlutter(Element element) {
-    var uri = element.library?.uri;
-    if (uri == null || uri.scheme != 'package') return false;
-    var segments = uri.pathSegments;
-    return segments.isNotEmpty && segments.first == 'flutter';
   }
 }
