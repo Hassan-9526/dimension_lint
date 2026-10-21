@@ -1,0 +1,22 @@
+name: dimension_lint
+description: >-
+  An analyzer plugin that flags raw numeric literals used as layout dimensions
+  in Flutter widget constructors, so a project can enforce its own sizing
+  convention.
+version: 0.1.0
+repository: https://github.com/Hassan-9526/dimension_lint
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  analysis_server_plugin: ^0.3.25
+  # analysis_server_plugin pins analyzer to an exact version (14.6.0 as of
+  # 0.3.25). Re-check this on every plugin bump.
+  analyzer: ^14.6.0
+
+dev_dependencies:
+  analyzer_testing: ^0.4.4
+  lints: ^6.1.0
+  test: ^1.25.0
+  test_reflective_loader: ^0.6.0
