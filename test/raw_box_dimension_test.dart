@@ -133,4 +133,25 @@ import 'package:flutter/widgets.dart';
 Widget f() => SizedBox(key: null, child: null);
 ''');
   }
+
+  Future<void> test_zero_isNotReported() async {
+    await assertNoDiagnostics(r'''
+import 'package:flutter/widgets.dart';
+Widget f() => const SizedBox(width: 0);
+''');
+  }
+
+  Future<void> test_one_isNotReported() async {
+    await assertNoDiagnostics(r'''
+import 'package:flutter/widgets.dart';
+Widget f() => const SizedBox(height: 1);
+''');
+  }
+
+  Future<void> test_zeroPointZero_isNotReported() async {
+    await assertNoDiagnostics(r'''
+import 'package:flutter/widgets.dart';
+Widget f() => const SizedBox(width: 0.0);
+''');
+  }
 }

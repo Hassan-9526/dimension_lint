@@ -83,7 +83,7 @@ class _Visitor extends SimpleAstVisitor<void> {
       if (!parameters.contains(parameterName)) continue;
 
       var value = argument.argumentExpression;
-      if (isNumericLiteral(value)) {
+      if (isReportableNumericLiteral(value)) {
         rule.reportAtNode(value, arguments: [parameterName, typeName!]);
       }
     }

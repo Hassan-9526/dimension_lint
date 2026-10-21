@@ -81,4 +81,21 @@ class EdgeInsets {
 EdgeInsets f() => const EdgeInsets.all(16);
 ''');
   }
+
+  Future<void> test_symmetricZero_isNotReported() async {
+    await assertNoDiagnostics(r'''
+import 'package:flutter/painting.dart';
+EdgeInsets f() => const EdgeInsets.symmetric(vertical: 0);
+''');
+  }
+
+  Future<void> test_fromLTRB_reportsOnlyNonExemptPositions() async {
+    await assertDiagnostics(
+      r'''
+import 'package:flutter/painting.dart';
+EdgeInsets f() => const EdgeInsets.fromLTRB(0, 16, 1, 24);
+''',
+      [lint(87, 2), lint(94, 2)],
+    );
+  }
 }

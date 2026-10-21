@@ -89,7 +89,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     for (var argument in node.argumentList.arguments) {
       // Named arguments do not consume a position.
       if (argument is NamedArgument) continue;
-      if (index < positions.length && isNumericLiteral(argument)) {
+      if (index < positions.length && isReportableNumericLiteral(argument)) {
         rule.reportAtNode(
           argument as Expression,
           arguments: [positions[index], constructor],
@@ -108,7 +108,7 @@ class _Visitor extends SimpleAstVisitor<void> {
       if (argument is! NamedArgument) continue;
       var parameterName = argument.name.lexeme;
       if (!parameters.contains(parameterName)) continue;
-      if (isNumericLiteral(argument.argumentExpression)) {
+      if (isReportableNumericLiteral(argument.argumentExpression)) {
         rule.reportAtNode(
           argument.argumentExpression,
           arguments: [parameterName, constructor],

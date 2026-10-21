@@ -55,7 +55,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     for (var argument in node.argumentList.arguments) {
       if (argument is! NamedArgument) continue;
       if (argument.name.lexeme != 'fontSize') continue;
-      if (isNumericLiteral(argument.argumentExpression)) {
+      if (isReportableNumericLiteral(argument.argumentExpression)) {
         rule.reportAtNode(argument.argumentExpression);
       }
     }

@@ -7,4 +7,6 @@
 - `raw_font_size`: flags numeric literals passed as `TextStyle.fontSize`.
 
 All rules are lint rules, so they are off by default and must be enabled under
-the `diagnostics` key in `analysis_options.yaml`.
+the `diagnostics` key in `analysis_options.yaml`. The literal values `0` and `1`
+are never reported. Excluding files uses the analyzer's own `exclude`, and
+single cases are suppressed with `// ignore: dimension_lint/<rule>`.

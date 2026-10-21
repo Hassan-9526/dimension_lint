@@ -81,6 +81,55 @@ line-height multiplier and is never reported, so the two parameters on the same
 type behave differently — which is only possible with resolved type
 information.
 
+## Configuration
+
+There is deliberately very little. `analysis_server_plugin` cannot pass
+arguments to a rule — a rule's entry in `analysis_options.yaml` can only set
+whether it is enabled and at what severity — so this package does not pretend
+to offer tunable options that would have nowhere to live.
+
+What you get instead:
+
+**Severity.** Promote a rule to a build-breaking error:
+
+```yaml
+plugins:
+  dimension_lint:
+    version: ^0.1.0
+    diagnostics:
+      raw_box_dimension: error
+```
+
+**`0` and `1` are never reported.** They are structural rather than design
+values: `EdgeInsets.only(left: 0)` carries no scaling intent, and a hairline of
+`1` must not scale.
+
+**Excluding files** uses the analyzer's own mechanism, which applies to plugin
+diagnostics too. Theme files that define your tokens should be excluded — the
+raw numbers there are the single source of truth and are correct:
+
+```yaml
+analyzer:
+  exclude:
+    - lib/core/theme/**
+```
+
+**Suppressing one case** uses a namespaced ignore comment:
+
+```dart
+// ignore: dimension_lint/raw_box_dimension
+const SizedBox(width: 42);
+
+// ignore_for_file: dimension_lint/raw_font_size
+```
+
+### No `mode` setting
+
+The rules inspect **numeric literals only**, which makes a
+`screenutil`-versus-`tokens` mode unnecessary: `16.h` is a property access and
+`AppSpacing.md` a static field reference, so both are structurally "not a
+literal" and pass under either convention. A mode setting would change nothing.
+
 ## Running in CI
 
 Use `dart analyze`, **not** `flutter analyze`:
