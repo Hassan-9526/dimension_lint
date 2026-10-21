@@ -1,0 +1,64 @@
+# Runs on every push and pull request. GitHub provides a fresh Linux machine,
+# checks out the code, and runs the steps below. A red X on a commit means one
+# of these steps exited non-zero.
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  # Checks the package itself: formatting, static analysis, and unit tests.
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          # analysis_server_plugin requires Dart 3.13 or later.
+          sdk: stable
+
+      - run: dart pub get
+
+      # Fails if any file is not formatted, rather than reformatting silently.
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      # Only lib and test: `example` contains deliberate rule violations, so
+      # analyzing it here would fail the build by design. It is checked in the
+      # `example` job below instead.
+      - name: Analyze
+        run: dart analyze --fatal-infos lib test
+
+      - run: dart test
+
+  # Loads the plugin into a real Flutter app and asserts it still reports what
+  # it should. This is what catches the plugin failing to load at all -- unit
+  # tests exercise the rules directly and would still pass.
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.7
+          channel: stable
+
+      - name: Resolve the example
+        working-directory: example
+        run: flutter pub get
+
+      # `dart analyze` exits 0 for info-level diagnostics, so compare the count
+      # instead. `flutter analyze` is not used: it silently drops plugin
+      # diagnostics (flutter/flutter#193203).
+      - name: Expect exactly 3 diagnostics
+        working-directory: example
+        run: |
+          dart analyze > analysis.txt 2>&1 || true
+          cat analysis.txt
+          count=$(grep -cE 'raw_box_dimension|raw_edge_insets|raw_font_size' analysis.txt || true)
+          echo "Found $count plugin diagnostics (expected 3)."
+          test "$count" -eq 3

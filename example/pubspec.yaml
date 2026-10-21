@@ -1,0 +1,11 @@
+name: dimension_lint_example
+description: A small app demonstrating the dimension_lint analyzer plugin.
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter

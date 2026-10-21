@@ -1,0 +1,16 @@
+# The plugin is enabled under the TOP-LEVEL `plugins` key, not under
+# `analyzer`. Restart the analysis server after editing this section.
+plugins:
+  dimension_lint:
+    path: ../
+    diagnostics:
+      raw_box_dimension: true
+      raw_edge_insets: true
+      raw_font_size: true
+
+analyzer:
+  exclude:
+    # Theme files define the tokens, so raw numbers here are the single
+    # source of truth and are correct.
+    - lib/theme/**
+    - build/**
