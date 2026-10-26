@@ -31,7 +31,11 @@ jobs:
         with:
           sdk: ${{ matrix.sdk }}
 
-      - run: dart pub get
+      # `--no-example` is required, not tidiness: a root `pub get` also resolves
+      # `example/`, which depends on the Flutter SDK. This job installs Dart
+      # alone, so without the flag resolution fails before any check runs. The
+      # `example` job resolves it properly, with Flutter installed.
+      - run: dart pub get --no-example
 
       # Fails if any file is not formatted, rather than reformatting silently.
       # Checked on the newest SDK only: the formatter's output is tied to the
