@@ -57,6 +57,11 @@ class Body extends StatelessWidget {
           // ignore: dimension_lint/raw_box_dimension
           const SizedBox(height: 40),
 
+          // REPORTED: a Dart 3.10 dot shorthand, where the context type
+          // supplies `EdgeInsets`. This parses as a different node than
+          // `EdgeInsets.all(12)`, so it is matched separately.
+          const Padding(padding: .all(12), child: SizedBox()),
+
           const Divider(
             // ACCEPTED: a hairline, which must not scale.
             thickness: 1.5,

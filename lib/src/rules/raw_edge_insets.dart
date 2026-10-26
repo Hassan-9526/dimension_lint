@@ -4,6 +4,7 @@ import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
+import 'package:dimension_lint/src/constructor_invocation.dart';
 import 'package:dimension_lint/src/flutter_element.dart';
 
 /// `EdgeInsets` constructors that take their dimensions positionally, mapped
@@ -50,7 +51,9 @@ class RawEdgeInsets extends AnalysisRule {
     RuleVisitorRegistry registry,
     RuleContext context,
   ) {
-    registry.addInstanceCreationExpression(this, _Visitor(this));
+    var visitor = _Visitor(this);
+    registry.addInstanceCreationExpression(this, visitor);
+    registry.addDotShorthandConstructorInvocation(this, visitor);
   }
 }
 
@@ -60,33 +63,43 @@ class _Visitor extends SimpleAstVisitor<void> {
   _Visitor(this.rule);
 
   @override
-  void visitInstanceCreationExpression(InstanceCreationExpression node) {
-    var element = node.constructorName.type.element;
-    if (element?.name != 'EdgeInsets') return;
-    if (!isFromFlutterPackage(element)) return;
+  void visitInstanceCreationExpression(InstanceCreationExpression node) =>
+      _check(node);
 
-    var constructor = node.constructorName.name?.name;
+  @override
+  void visitDotShorthandConstructorInvocation(
+    DotShorthandConstructorInvocation node,
+  ) => _check(node);
+
+  void _check(AstNode node) {
+    var invocation = resolveFlutterConstructor(node);
+    if (invocation == null) return;
+    if (invocation.typeName != 'EdgeInsets') return;
+
+    var constructor = invocation.constructorName;
     if (constructor == null) return;
+
+    var arguments = invocation.argumentList;
 
     var positions = _positionalConstructors[constructor];
     if (positions != null) {
-      _reportPositional(node, constructor, positions);
+      _reportPositional(arguments, constructor, positions);
       return;
     }
 
     var parameters = _namedConstructors[constructor];
     if (parameters != null) {
-      _reportNamed(node, constructor, parameters);
+      _reportNamed(arguments, constructor, parameters);
     }
   }
 
   void _reportPositional(
-    InstanceCreationExpression node,
+    ArgumentList argumentList,
     String constructor,
     List<String> positions,
   ) {
     var index = 0;
-    for (var argument in node.argumentList.arguments) {
+    for (var argument in argumentList.arguments) {
       // Named arguments do not consume a position.
       if (argument is NamedArgument) continue;
       if (index < positions.length && isReportableNumericLiteral(argument)) {
@@ -100,11 +113,11 @@ class _Visitor extends SimpleAstVisitor<void> {
   }
 
   void _reportNamed(
-    InstanceCreationExpression node,
+    ArgumentList argumentList,
     String constructor,
     Set<String> parameters,
   ) {
-    for (var argument in node.argumentList.arguments) {
+    for (var argument in argumentList.arguments) {
       if (argument is! NamedArgument) continue;
       var parameterName = argument.name.lexeme;
       if (!parameters.contains(parameterName)) continue;

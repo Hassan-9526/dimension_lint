@@ -1,0 +1,13 @@
+name: floor_check
+description: >-
+  A minimal app used to confirm the plugin still loads on the oldest Dart SDK
+  the package supports. Not published; see ../../.pubignore.
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter

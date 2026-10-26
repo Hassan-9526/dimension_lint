@@ -11,8 +11,18 @@ Every rule is therefore off by default and must be opted into.
 
 ## Requirements
 
-Dart 3.13+ (Flutter 3.47+), because analyzer plugins require the
-`analysis_server_plugin` framework.
+Dart 3.11+ (Flutter 3.41+), because analyzer plugins require the
+`analysis_server_plugin` framework. Dart 3.11 is the lowest possible: both
+analyzer 13 and 14 require it, and `analysis_server_plugin` has never supported
+an SDK below 3.9.
+
+On Dart 3.11 and 3.12 pub resolves `analysis_server_plugin` 0.3.24; on 3.13 and
+later it resolves 0.3.25. CI runs the rule tests on both ends, and loads the
+plugin into a real Flutter app at each end too.
+
+One difference at the low end: dot shorthands for `EdgeInsets` (below) rely on
+redirecting factories that Flutter added to `EdgeInsetsGeometry` in a later
+release, so on older Flutter that syntax does not compile in the first place.
 
 ## Usage
 
@@ -80,6 +90,40 @@ Flags numeric literals passed as `TextStyle.fontSize`. `TextStyle.height` is a
 line-height multiplier and is never reported, so the two parameters on the same
 type behave differently — which is only possible with resolved type
 information.
+
+### Dot shorthands
+
+Since Dart 3.10 a constructor can be written as a shorthand, letting the context
+type supply the class. Both forms are reported identically:
+
+```dart
+padding: const EdgeInsets.all(16),  // reported
+padding: .all(16),                  // reported
+```
+
+This needs more than matching the shorthand's name. `Padding.padding` is typed
+`EdgeInsetsGeometry`, so `.all(16)` resolves to the redirecting factory
+`EdgeInsetsGeometry.all` that Flutter declares for exactly this purpose, not to
+`EdgeInsets.all`. The rules follow the redirect to the constructor actually
+invoked.
+
+## Not covered yet
+
+Only the types listed above are inspected. These are recognized sizing APIs
+that no rule currently matches, so a raw literal in one is **not** reported:
+
+| Not reported | |
+| --- | --- |
+| `Positioned(top: 12)` | and `left`, `right`, `bottom` |
+| `SizedBox.square(dimension: 48)` | and `SizedBox.fromSize` |
+| `EdgeInsetsDirectional.only(start: 16)` | and `EdgeInsetsDirectional.fromSTEB` |
+| `BorderRadius.circular(12)` | and the other radius constructors |
+| `Icon(size: 32)` | |
+| `Container(constraints: ...)` | `BoxConstraints` dimensions |
+
+These are gaps rather than deliberate exclusions — unlike the cases in the
+tables above, which are wrong to report. Open an issue if one of them is
+blocking you.
 
 ## Configuration
 

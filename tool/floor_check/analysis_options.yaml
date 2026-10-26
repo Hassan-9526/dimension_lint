@@ -1,0 +1,10 @@
+analyzer:
+  exclude:
+    - build/**
+plugins:
+  dimension_lint:
+    path: ../../
+    diagnostics:
+      raw_box_dimension: true
+      raw_edge_insets: true
+      raw_font_size: true

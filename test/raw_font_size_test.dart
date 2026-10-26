@@ -48,4 +48,22 @@ class AppText {
 TextStyle f() => const TextStyle(fontSize: AppText.body);
 ''');
   }
+
+  /// A dot shorthand parses as a different node but must report identically.
+  Future<void> test_dotShorthand_fontSize() async {
+    await assertDiagnostics(
+      r'''
+import 'package:flutter/painting.dart';
+TextStyle f() => const .new(fontSize: 18);
+''',
+      [lint(78, 2)],
+    );
+  }
+
+  Future<void> test_dotShorthand_height_isNotReported() async {
+    await assertNoDiagnostics(r'''
+import 'package:flutter/painting.dart';
+TextStyle f() => const .new(height: 1.2);
+''');
+  }
 }

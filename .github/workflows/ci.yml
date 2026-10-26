@@ -7,23 +7,37 @@ on:
   push:
     branches: [main, master]
   pull_request:
+  # Allows a re-run from the Actions tab without pushing an empty commit.
+  workflow_dispatch:
 
 jobs:
   # Checks the package itself: formatting, static analysis, and unit tests.
   package:
     runs-on: ubuntu-latest
+    strategy:
+      # Report both ends rather than stopping at the first failure; which end
+      # breaks is the useful information.
+      fail-fast: false
+      matrix:
+        # Both ends of the range the pubspec advertises. Pub resolves by SDK, so
+        # 3.11.0 exercises analysis_server_plugin 0.3.24 with analyzer 14.5.0
+        # and 3.13.7 exercises 0.3.25 with analyzer 14.6.0. Pinned rather than
+        # `stable`, so a re-run resolves the same SDKs it did first time.
+        sdk: ['3.11.0', '3.13.7']
     steps:
       - uses: actions/checkout@v4
 
       - uses: dart-lang/setup-dart@v1
         with:
-          # analysis_server_plugin requires Dart 3.13 or later.
-          sdk: stable
+          sdk: ${{ matrix.sdk }}
 
       - run: dart pub get
 
       # Fails if any file is not formatted, rather than reformatting silently.
+      # Checked on the newest SDK only: the formatter's output is tied to the
+      # SDK, so checking both would deadlock if the two ever disagree.
       - name: Check formatting
+        if: matrix.sdk == '3.13.7'
         run: dart format --output=none --set-exit-if-changed .
 
       # Only lib and test: `example` contains deliberate rule violations, so
@@ -54,8 +68,36 @@ jobs:
       # `dart analyze` exits 0 for info-level diagnostics, so compare the count
       # instead. `flutter analyze` is not used: it silently drops plugin
       # diagnostics (flutter/flutter#193203).
-      - name: Expect exactly 3 diagnostics
+      - name: Expect exactly 4 diagnostics
         working-directory: example
+        run: |
+          dart analyze > analysis.txt 2>&1 || true
+          cat analysis.txt
+          count=$(grep -cE 'raw_box_dimension|raw_edge_insets|raw_font_size' analysis.txt || true)
+          echo "Found $count plugin diagnostics (expected 4)."
+          test "$count" -eq 4
+
+  # Confirms the plugin still loads on the oldest SDK the pubspec advertises.
+  # The `example` app cannot be reused here: it contains a dot shorthand that
+  # resolves through redirecting factories Flutter added to `EdgeInsetsGeometry`
+  # later, so it does not compile on Flutter 3.41 at all.
+  floor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          # The oldest Flutter that ships Dart 3.11.
+          flutter-version: 3.41.2
+          channel: stable
+
+      - name: Resolve the floor check
+        working-directory: tool/floor_check
+        run: flutter pub get
+
+      - name: Expect exactly 3 diagnostics
+        working-directory: tool/floor_check
         run: |
           dart analyze > analysis.txt 2>&1 || true
           cat analysis.txt

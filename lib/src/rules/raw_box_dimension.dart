@@ -4,6 +4,7 @@ import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
+import 'package:dimension_lint/src/constructor_invocation.dart';
 import 'package:dimension_lint/src/flutter_element.dart';
 
 /// The constructor types this rule inspects, mapped to the named parameters on
@@ -57,6 +58,7 @@ class RawBoxDimension extends AnalysisRule {
   ) {
     var visitor = _Visitor(this);
     registry.addInstanceCreationExpression(this, visitor);
+    registry.addDotShorthandConstructorInvocation(this, visitor);
   }
 }
 
@@ -66,25 +68,30 @@ class _Visitor extends SimpleAstVisitor<void> {
   _Visitor(this.rule);
 
   @override
-  void visitInstanceCreationExpression(InstanceCreationExpression node) {
-    var element = node.constructorName.type.element;
-    if (element == null) return;
+  void visitInstanceCreationExpression(InstanceCreationExpression node) =>
+      _check(node);
 
-    var typeName = element.name;
+  @override
+  void visitDotShorthandConstructorInvocation(
+    DotShorthandConstructorInvocation node,
+  ) => _check(node);
+
+  void _check(AstNode node) {
+    var invocation = resolveFlutterConstructor(node);
+    if (invocation == null) return;
+
+    var typeName = invocation.typeName;
     var parameters = _targets[typeName];
     if (parameters == null) return;
 
-    // A project may well declare its own `SizedBox`; only Flutter's counts.
-    if (!isFromFlutterPackage(element)) return;
-
-    for (var argument in node.argumentList.arguments) {
+    for (var argument in invocation.argumentList.arguments) {
       if (argument is! NamedArgument) continue;
       var parameterName = argument.name.lexeme;
       if (!parameters.contains(parameterName)) continue;
 
       var value = argument.argumentExpression;
       if (isReportableNumericLiteral(value)) {
-        rule.reportAtNode(value, arguments: [parameterName, typeName!]);
+        rule.reportAtNode(value, arguments: [parameterName, typeName]);
       }
     }
   }

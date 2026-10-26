@@ -154,4 +154,35 @@ import 'package:flutter/widgets.dart';
 Widget f() => const SizedBox(width: 0.0);
 ''');
   }
+
+  /// A dot shorthand parses as a different node but must report identically.
+  /// The context type here is `SizedBox` rather than `Widget`, since an
+  /// abstract context type cannot resolve `.new`.
+  Future<void> test_dotShorthand_sizedBoxWidth() async {
+    await assertDiagnostics(
+      r'''
+import 'package:flutter/widgets.dart';
+SizedBox f() => const .new(width: 42);
+''',
+      [lint(73, 2)],
+    );
+  }
+
+  /// The shorthand must not bypass the check that the type is Flutter's.
+  Future<void> test_dotShorthand_nonFlutterSizedBox_isNotReported() async {
+    await assertNoDiagnostics(r'''
+class SizedBox {
+  const SizedBox({this.width});
+  final double? width;
+}
+SizedBox f() => const .new(width: 42);
+''');
+  }
+
+  Future<void> test_dotShorthand_zero_isNotReported() async {
+    await assertNoDiagnostics(r'''
+import 'package:flutter/widgets.dart';
+SizedBox f() => const .new(width: 0);
+''');
+  }
 }

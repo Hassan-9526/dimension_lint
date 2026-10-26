@@ -4,6 +4,7 @@ import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
+import 'package:dimension_lint/src/constructor_invocation.dart';
 import 'package:dimension_lint/src/flutter_element.dart';
 
 /// Flags numeric literals passed as `TextStyle.fontSize`.
@@ -37,7 +38,9 @@ class RawFontSize extends AnalysisRule {
     RuleVisitorRegistry registry,
     RuleContext context,
   ) {
-    registry.addInstanceCreationExpression(this, _Visitor(this));
+    var visitor = _Visitor(this);
+    registry.addInstanceCreationExpression(this, visitor);
+    registry.addDotShorthandConstructorInvocation(this, visitor);
   }
 }
 
@@ -47,12 +50,20 @@ class _Visitor extends SimpleAstVisitor<void> {
   _Visitor(this.rule);
 
   @override
-  void visitInstanceCreationExpression(InstanceCreationExpression node) {
-    var element = node.constructorName.type.element;
-    if (element?.name != 'TextStyle') return;
-    if (!isFromFlutterPackage(element)) return;
+  void visitInstanceCreationExpression(InstanceCreationExpression node) =>
+      _check(node);
 
-    for (var argument in node.argumentList.arguments) {
+  @override
+  void visitDotShorthandConstructorInvocation(
+    DotShorthandConstructorInvocation node,
+  ) => _check(node);
+
+  void _check(AstNode node) {
+    var invocation = resolveFlutterConstructor(node);
+    if (invocation == null) return;
+    if (invocation.typeName != 'TextStyle') return;
+
+    for (var argument in invocation.argumentList.arguments) {
       if (argument is! NamedArgument) continue;
       if (argument.name.lexeme != 'fontSize') continue;
       if (isReportableNumericLiteral(argument.argumentExpression)) {

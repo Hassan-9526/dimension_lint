@@ -5,18 +5,33 @@ description: >-
   convention.
 version: 0.1.0
 repository: https://github.com/Hassan-9526/dimension_lint
+issue_tracker: https://github.com/Hassan-9526/dimension_lint/issues
+topics:
+  - lint
+  - analyzer-plugin
+  - flutter
+  - linter
 
 environment:
-  sdk: ^3.13.0
+  # Dart 3.11 is the floor, not 3.13: analysis_server_plugin 0.3.25 raised its
+  # own constraint to ^3.13.0, but 0.3.24 supports 3.11 and the rules compile
+  # against either. Dart 3.11 ships with Flutter 3.41. Going lower is not
+  # possible -- analyzer 13 and 14 both require ^3.11.0.
+  sdk: ^3.11.0
 
 dependencies:
-  analysis_server_plugin: ^0.3.25
-  # analysis_server_plugin pins analyzer to an exact version (14.6.0 as of
-  # 0.3.25). Re-check this on every plugin bump.
-  analyzer: ^14.6.0
+  # Ranges rather than carets, so pub resolves by SDK: 0.3.25 with analyzer
+  # 14.6.0 on Dart 3.13+, and 0.3.24 with analyzer 14.5.0 on 3.11 and 3.12.
+  # analysis_server_plugin pins analyzer to an exact version, so the analyzer
+  # range has to admit every version its own range can pull in. Re-check both
+  # on every plugin bump.
+  analysis_server_plugin: '>=0.3.24 <0.4.0'
+  analyzer: '>=14.5.0 <15.0.0'
 
 dev_dependencies:
-  analyzer_testing: ^0.4.4
+  # 0.4.4 raised its constraint to ^3.13.0, so the lower bound has to admit
+  # 0.4.3 for the Dart 3.11 job in CI. The rule tests pass against either.
+  analyzer_testing: '>=0.4.3 <0.5.0'
   lints: ^6.1.0
   test: ^1.25.0
   test_reflective_loader: ^0.6.0
