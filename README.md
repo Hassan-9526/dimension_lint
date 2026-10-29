@@ -26,20 +26,38 @@ release, so on older Flutter that syntax does not compile in the first place.
 
 ## Usage
 
-Add the plugin under the **top-level** `plugins:` key of
-`analysis_options.yaml`, and enable the rules you want:
+Either run the installer:
+
+```sh
+dart pub global activate dimension_lint
+dimension_lint init
+```
+
+It writes the block below into the project's `analysis_options.yaml`, leaving
+any existing content and comments untouched. Re-running it is a no-op, and if
+the project already has a `plugins:` key for something else it prints what to
+add rather than rewriting a block you own.
+
+Or add it by hand, under the **top-level** `plugins:` key of
+`analysis_options.yaml`:
 
 ```yaml
 plugins:
   dimension_lint:
-    version: ^0.1.0
+    version: ^0.2.0
     diagnostics:
       raw_box_dimension: true
       raw_edge_insets: true
       raw_font_size: true
 ```
 
-Restart the Dart Analysis Server after changing this section.
+Either way, run `dart pub get` and restart the Dart Analysis Server afterwards
+(VS Code: **Dart: Restart Analysis Server**). The first analysis after that is
+slow, because the server compiles the plugin before it can run.
+
+Note that the plugin is **not** a `pubspec.yaml` dependency. `dart pub add`
+only writes to `pubspec.yaml` and cannot enable a plugin, and the app being
+analyzed never links against this package.
 
 ## Rules
 
@@ -139,7 +157,7 @@ What you get instead:
 ```yaml
 plugins:
   dimension_lint:
-    version: ^0.1.0
+    version: ^0.2.0
     diagnostics:
       raw_box_dimension: error
 ```

@@ -3,7 +3,7 @@
 plugins:
   dimension_lint:
     # `path` because this app lives in the plugin's own repository. A consuming
-    # project uses `version: ^0.1.0` here instead; see the README.
+    # project uses `version: ^0.2.0` here instead; see the README.
     path: ../
     diagnostics:
       raw_box_dimension: true

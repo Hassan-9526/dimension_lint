@@ -3,7 +3,7 @@ description: >-
   An analyzer plugin that flags raw numeric literals used as layout dimensions
   in Flutter widget constructors, so a project can enforce its own sizing
   convention.
-version: 0.1.0
+version: 0.2.0
 repository: https://github.com/Hassan-9526/dimension_lint
 issue_tracker: https://github.com/Hassan-9526/dimension_lint/issues
 topics:
@@ -27,6 +27,9 @@ dependencies:
   # on every plugin bump.
   analysis_server_plugin: '>=0.3.24 <0.4.0'
   analyzer: '>=14.5.0 <15.0.0'
+  # Used by `bin/dimension_lint.dart` to detect an existing `plugins:` key.
+  # Already in the tree via analyzer; declared because it is imported directly.
+  yaml: ^3.1.2
 
 dev_dependencies:
   # 0.4.4 raised its constraint to ^3.13.0, so the lower bound has to admit

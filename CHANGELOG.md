@@ -1,3 +1,24 @@
+## 0.2.0
+
+- Adds an installer, so enabling the plugin no longer means hand-editing YAML:
+
+  ```sh
+  dart pub global activate dimension_lint
+  dimension_lint init
+  ```
+
+  It appends the `plugins:` block to the project's `analysis_options.yaml`,
+  preserving existing content and comments. Re-running it changes nothing, and
+  a project that already has a `plugins:` key for another plugin is told what
+  to add rather than having that block rewritten.
+
+  Global activation rather than a dependency, because an analyzer plugin is
+  enabled in `analysis_options.yaml` and must not be a dependency of the app it
+  analyzes. `dart pub add` writes only to `pubspec.yaml` and so cannot enable a
+  plugin at all.
+
+No rule behaviour changed in this release.
+
 ## 0.1.0
 
 - `raw_box_dimension`: flags numeric literals passed as `width`/`height` on
