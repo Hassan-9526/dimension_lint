@@ -4,6 +4,10 @@ publish_to: 'none'
 version: 1.0.0
 
 environment:
+  # Higher than the package's own `^3.11.0` floor, deliberately. `main.dart`
+  # uses a dot shorthand that resolves through redirecting factories Flutter
+  # added to `EdgeInsetsGeometry` later, so this app does not compile on the
+  # oldest SDK the plugin supports. `tool/floor_check` covers that end instead.
   sdk: ^3.13.0
 
 dependencies:
