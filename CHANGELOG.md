@@ -1,3 +1,13 @@
+## 0.2.1
+
+- Fixes `dimension_lint init` being unavailable as a command. 0.2.0 shipped
+  `bin/dimension_lint.dart` without an `executables:` key in the pubspec, so
+  `dart pub global activate` built the executable but created no shim for it:
+  the documented `dimension_lint init` failed with "command not found" and only
+  `dart pub global run dimension_lint init` worked.
+
+Rule behaviour is unchanged from 0.2.0.
+
 ## 0.2.0
 
 - Adds an installer, so enabling the plugin no longer means hand-editing YAML:

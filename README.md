@@ -33,6 +33,18 @@ dart pub global activate dimension_lint
 dimension_lint init
 ```
 
+The installer runs on whichever `dart` is first on your `PATH`, so that one has
+to be 3.11 or newer too -- an older Dart there fails with "version solving
+failed" even when the project itself uses a newer SDK.
+
+If the shell reports `dimension_lint: command not found`, the pub cache's `bin`
+directory is not on your `PATH`. Either add it (`~/.pub-cache/bin`, or
+`%LOCALAPPDATA%\Pub\Cachein` on Windows) or run the command the long way:
+
+```sh
+dart pub global run dimension_lint init
+```
+
 It writes the block below into the project's `analysis_options.yaml`, leaving
 any existing content and comments untouched. Re-running it is a no-op, and if
 the project already has a `plugins:` key for something else it prints what to
@@ -44,7 +56,7 @@ Or add it by hand, under the **top-level** `plugins:` key of
 ```yaml
 plugins:
   dimension_lint:
-    version: ^0.2.0
+    version: ^0.2.1
     diagnostics:
       raw_box_dimension: true
       raw_edge_insets: true
@@ -157,7 +169,7 @@ What you get instead:
 ```yaml
 plugins:
   dimension_lint:
-    version: ^0.2.0
+    version: ^0.2.1
     diagnostics:
       raw_box_dimension: error
 ```

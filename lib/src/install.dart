@@ -4,7 +4,7 @@ import 'package:yaml/yaml.dart';
 ///
 /// Kept in step with the package's own version by a test, so that a release
 /// cannot ship an installer that configures an older plugin than itself.
-const String pluginVersionConstraint = '^0.2.0';
+const String pluginVersionConstraint = '^0.2.1';
 
 /// The block [configurePlugins] appends when a project has no `plugins:` key.
 const String pluginBlock =

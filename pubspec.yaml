@@ -3,9 +3,14 @@ description: >-
   An analyzer plugin that flags raw numeric literals used as layout dimensions
   in Flutter widget constructors, so a project can enforce its own sizing
   convention.
-version: 0.2.0
+version: 0.2.1
 repository: https://github.com/Hassan-9526/dimension_lint
 issue_tracker: https://github.com/Hassan-9526/dimension_lint/issues
+# Without this key `dart pub global activate` builds the executable but never
+# creates the `dimension_lint` shim, so only `dart pub global run` works.
+executables:
+  dimension_lint:
+
 topics:
   - lint
   - analyzer-plugin
