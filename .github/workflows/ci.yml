@@ -71,7 +71,7 @@ jobs:
 
       # `dart analyze` exits 0 for info-level diagnostics, so compare the count
       # instead. `flutter analyze` is not used: it silently drops plugin
-      # diagnostics (flutter/flutter#193203).
+      # diagnostics (flutter/flutter#187999).
       - name: Expect exactly 4 diagnostics
         working-directory: example
         run: |

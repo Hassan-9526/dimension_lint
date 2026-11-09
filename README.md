@@ -202,13 +202,16 @@ dart analyze --fatal-infos
 
 Two reasons:
 
-1. `flutter analyze` currently drops analyzer plugin diagnostics and reports
-   "No issues found!" even when violations exist
-   ([flutter/flutter#193203][], root cause [dart-lang/sdk#63787][]).
+1. On every stable Flutter this package supports, `flutter analyze` drops
+   analyzer plugin diagnostics and reports "No issues found!" even when
+   violations exist ([flutter/flutter#187999][], root cause
+   [dart-lang/sdk#63787][]). A fix is reported to have landed on the 3.50 beta,
+   so this will stop being true on newer stable releases -- but the floor here
+   is Flutter 3.41, and `dart analyze` is correct on every version either way.
 2. Plugin lints report at `info` severity, so `dart analyze` exits `0` without
-   `--fatal-infos` and CI would pass silently.
+   `--fatal-infos` and CI would pass silently. This reason does not expire.
 
-[flutter/flutter#193203]: https://github.com/flutter/flutter/issues/193203
+[flutter/flutter#187999]: https://github.com/flutter/flutter/issues/187999
 [dart-lang/sdk#63787]: https://github.com/dart-lang/sdk/issues/63787
 
 ## Quick fixes
